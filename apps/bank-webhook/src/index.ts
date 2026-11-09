@@ -7,8 +7,8 @@ app.use(express.json());
 
 const paymentSchema = z.object({
   token: z.string(),
-  userId: z.number(),
-  amount: z.string(),
+  userId: z.number().int().positive(),
+  amount: z.coerce.number().positive(),
 });
 
 app.post("/hdfcWebhook", async (req, res) => {
@@ -27,28 +27,18 @@ app.post("/hdfcWebhook", async (req, res) => {
       },
     });
 
-    if (onRampTransaction && onRampTransaction.status === "Processing") {
-      await db.$transaction([
-        db.balance.update({
-          where: {
-            userId: paymentInformation.userId,
-          },
-          data: {
-            amount: {
-              increment: Number(paymentInformation.amount),
-            },
-          },
-        }),
-
-        db.onRampTransaction.update({
-          where: {
-            token: paymentInformation.token,
-          },
-          data: {
-            status: "Success",
-          },
-        }),
-      ]);
+    if (onRampTransaction?.status === "Processing" && onRampTransaction.userId === paymentInformation.userId) {
+      await db.$transaction(async (tx) => {
+        const claimed = await tx.onRampTransaction.updateMany({
+          where: { token: paymentInformation.token, status: "Processing" },
+          data: { status: "Success" },
+        });
+        if (claimed.count !== 1) throw new Error("Webhook already processed");
+        await tx.balance.update({
+          where: { userId: paymentInformation.userId },
+          data: { amount: { increment: onRampTransaction.amount } },
+        });
+      });
       res.status(200).json({ message: "Transaction successful" });
     } else {
       res.status(400).json({ message: "Transaction cannot be processed" });

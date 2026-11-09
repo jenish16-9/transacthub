@@ -5,6 +5,7 @@ import { Select } from "@repo/ui/select";
 import { useState } from "react";
 import { TextInput } from "@repo/ui/textinput";
 import { createOnRampTransaction } from "../app/lib/actions/createOnrampTransaction";
+import { useWallet } from "../context/WalletContext";
 
 const SUPPORTED_BANKS = [
   {
@@ -18,6 +19,7 @@ const SUPPORTED_BANKS = [
 ];
 
 export const AddMoney = () => {
+  const { refresh } = useWallet();
   const [redirectUrl, setRedirectUrl] = useState(
     SUPPORTED_BANKS[0]?.redirectUrl,
   );
@@ -52,6 +54,7 @@ export const AddMoney = () => {
           <Button
             onClick={async () => {
               await createOnRampTransaction(provider, value);
+              await refresh();
               window.location.href = redirectUrl || "";
             }}
           >

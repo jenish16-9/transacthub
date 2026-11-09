@@ -1,9 +1,10 @@
 "use client";
 
-//@ts-ignore
-import { useBalance } from "@repo/store/balance";
-
 export default function () {
-  const balance = useBalance();
-  return <div>hi there {balance}</div>;
+  return (
+    <main className="min-h-screen bg-slate-50 p-10">
+      <h1 className="text-3xl font-bold text-slate-900">TransactHub Merchant</h1>
+      <p className="mt-2 text-slate-600">Merchant settlement and payment operations workspace.</p>
+    </main>
+  );
 }

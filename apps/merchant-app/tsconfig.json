@@ -1,6 +1,7 @@
 {
   "extends": "@repo/typescript-config/nextjs.json",
   "compilerOptions": {
+    "allowJs": true,
     "plugins": [
       {
         "name": "next"
@@ -12,6 +13,7 @@
     "next.config.js",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.js",
     ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]

@@ -5,6 +5,7 @@ import { Center } from "@repo/ui/center";
 import { TextInput } from "@repo/ui/textinput";
 import { useState } from "react";
 import { p2pTransfer } from "../app/lib/actions/p2pTransfer";
+import { useWallet } from "../context/WalletContext";
 
 export const SendCard = ({
   transactions,
@@ -15,6 +16,10 @@ export const SendCard = ({
     userId: number;
   }[];
 }) => {
+  const [number, setNumber] = useState("");
+  const [amount, setAmount] = useState(0);
+  const { refresh } = useWallet();
+
   if (!transactions.length) {
     return (
       <Card title="Recent Transactions">
@@ -22,9 +27,6 @@ export const SendCard = ({
       </Card>
     );
   }
-  const [number, setNumber] = useState("");
-  const [amount, setAmount] = useState(0);
-
   return (
     <div className="h-[90vh] bg-gray-100">
       <Center>
@@ -47,7 +49,10 @@ export const SendCard = ({
               />
               <div className="pt-4 flex justify-center">
                 <Button
-                  onClick={async () => await p2pTransfer(number, amount * 100)}
+                  onClick={async () => {
+                    await p2pTransfer(number, amount * 100);
+                    await refresh();
+                  }}
                 >
                   Send
                 </Button>

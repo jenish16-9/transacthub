@@ -4,6 +4,9 @@ import { authOptions } from "../auth";
 import prisma from "@repo/db/client";
 
 export async function p2pTransfer(to: string, amount: number) {
+  if (!Number.isInteger(amount) || amount <= 0) {
+    return { message: "Amount must be positive" };
+  }
   const session = await getServerSession(authOptions);
   const fromId = session?.user?.id;
 
@@ -23,7 +26,8 @@ export async function p2pTransfer(to: string, amount: number) {
     };
   }
 
-  await prisma.$transaction(async (tx) => {
+  try {
+    await prisma.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT * FROM "Balance" WHERE "userId" = ${Number(fromId)} FOR UPDATE`;
 
     const fromUserBalance = await tx.balance.findUnique({
@@ -52,5 +56,9 @@ export async function p2pTransfer(to: string, amount: number) {
         toUserId: toUser.id,
       },
     });
-  });
+    });
+    return { message: "Transfer successful" };
+  } catch (error) {
+    return { message: error instanceof Error ? error.message : "Transfer failed" };
+  }
 }

@@ -1,13 +1,25 @@
-# Paytm Project
+# TransactHub: Real-Time Payment & Wallet Platform
 
 ## Tech Stack
 
-- **Frontend & Backend**: [Next.js](https://nextjs.org/)
-- **Auxiliary Backend**: [Express](https://expressjs.com/)
-- **Monorepo Management**: [Turborepo](https://turborepo.org/)
+- **Frontend & Backend**: [Next.js](https://nextjs.org/), [Express](https://expressjs.com/)
+- **State Management**: React Context API
+- **Monorepo Management**: [Turborepo](https://turbo.build/repo)
 - **Database**: [PostgreSQL](https://www.postgresql.org/)
 - **ORM**: [Prisma](https://www.prisma.io/)
 - **CSS Framework**: [Tailwind CSS](https://tailwindcss.com/)
+- **Deployment**: Docker, AWS ECS Fargate, Amazon ECR, Amazon RDS, CloudWatch
+
+TransactHub is a distributed wallet application with separate user, merchant,
+and bank-webhook services. It supports wallet funding, simulated bank
+callbacks, peer-to-peer transfers, transaction history, and near-real-time
+balance synchronization through the React Context API.
+
+The project includes Terraform infrastructure under `infra/aws/` for deploying
+the user app to ECS Fargate behind an Application Load Balancer, storing wallet
+data in Amazon RDS for PostgreSQL, publishing images to Amazon ECR, and sending
+container logs to CloudWatch. The GitHub Actions workflow uses AWS OIDC rather
+than long-lived access keys.
 
 ## Getting Started
 
@@ -27,7 +39,7 @@ Ensure you have the following installed on your machine:
 - **merchant-app**: Manages merchant-related functionalities.
 - **bank-webhook**: Simulates bank responses for transaction confirmations.
 
-#### Money Transfer Process
+#### Wallet Funding Process
 
 1. **Add Money:**
    - Navigate to the transfer section in **user-app**.
@@ -44,8 +56,8 @@ Ensure you have the following installed on your machine:
    - Bank-webhook server runs at `http://localhost:3003`.
 
 3. **Complete Transaction:**
-   - Bank-webhook will change the status from **pending** to **success**.
-   - Once the status is updated, the user's wallet will reflect the credited amount.
+   - Bank-webhook changes the transaction from **Processing** to **Success**.
+   - The wallet context polls the authenticated wallet endpoint and reflects the credited amount without a full page reload.
 
 #### P2P Transfer
 
@@ -56,7 +68,7 @@ Ensure you have the following installed on your machine:
 1. **Clone the repository:**
 
    ```sh
-   git clone https://github.com/priyanshu1044/paytm-final.git
+   git clone https://github.com/jenish16-9/transacthub.git
    ```
 
 2. **Install dependencies:**
@@ -111,13 +123,13 @@ To build and run the application using Docker:
 1. **Build the Docker image:**
 
    ```sh
-   docker build -t priyanshu1044/paytm-final -f docker/Dockerfile.user-app .
+   docker build -t transacthub-user-app -f docker/Dockerfile.user-app .
    ```
 
 2. **Run the Docker container:**
 
    ```sh
-   docker run -p 3000:3000 priyanshu1044/paytm-final
+   docker run --env-file .env -p 3000:3000 transacthub-user-app
    ```
 
 (keep in mind that you have to set up the database as mentioned in the installation section)
@@ -135,8 +147,8 @@ We love contributions! Whether you're fixing bugs, improving the documentation, 
 2. **Clone your fork**:
 
    ```sh
-   git clone https://github.com/YOUR-USERNAME/paytm-final.git
-   cd paytm-final
+   git clone https://github.com/YOUR-USERNAME/transacthub.git
+   cd transacthub
    ```
 
 3. **Create a new branch**:
